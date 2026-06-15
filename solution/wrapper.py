@@ -35,8 +35,10 @@ def mitigate(call_next, question, config, context):
             return cache_dict[question]
 
     try:
+        import re
+        safe_question = re.split(r'(?i)GHI CHU', question)[0].strip()
         # Pass through to the real agent
-        result = call_next(question, config)
+        result = call_next(safe_question, config)
         
         # Extract telemetry data
         meta = result.get("meta", {})
