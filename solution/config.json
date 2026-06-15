@@ -24,7 +24,7 @@
   "tool_error_rate": 0.0,
   "catalog_override": {},
   "route_rules": [],
-  "planner": false,
+  "planner": true,
   "verify": true,
   "self_consistency": 3,
   "tool_budget": 3

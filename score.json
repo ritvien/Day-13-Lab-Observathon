@@ -1,21 +1,21 @@
 {
   "team": "AntiGravity",
   "phase": "private",
-  "headline": 89.29,
+  "headline": 90.07,
   "sub": {
-    "correct": 0.665,
-    "quality": 0.7921,
+    "correct": 0.6775,
+    "quality": 0.8012,
     "error": 1.0,
-    "latency": 0.3163,
+    "latency": 0.4043,
     "cost": 0.0,
-    "drift": 0.7801,
-    "prompt": 0.8229
+    "drift": 0.701,
+    "prompt": 0.8283
   },
   "diag_f1": 1.0,
   "n": 80,
-  "n_correct": 52,
+  "n_correct": 53,
   "judge_mode": "offline",
   "weights_hash": "e81a8ed58d93",
   "key_hash": "7e3905b75db0",
-  "sig": "62556c2538f3277816394dcf58c805d662dba2996a58bba8383603b10f61f632"
+  "sig": "c6538b3714ed00a80137f74a8f852319393a392d51ebf302117813f82d79a5d3"
 }
