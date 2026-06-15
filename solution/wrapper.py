@@ -17,17 +17,60 @@ the config you pass to call_next, e.g.:
 """
 from __future__ import annotations
 
-# You may reuse the Day 13 toolkit, e.g.:
-# from telemetry.logger import logger
-# from telemetry.cost import cost_from_usage
-# from telemetry.redact import redact
-
+from telemetry.logger import logger
+from telemetry.cost import cost_from_usage
+from telemetry.redact import redact
 
 def mitigate(call_next, question, config, context):
-    # TODO: add observability here (log latency, tokens, cost, errors, PII, tool counts).
-    # TODO: add mitigations (retry on error, cache repeats, route cheap, reset drifting
-    #       sessions, validate arithmetic, sanitize order notes, redact PII...).
-    # TODO: optionally route a better system prompt:
-    #       conf = dict(config); conf["system_prompt"] = "..."; return call_next(question, conf)
-    result = call_next(question, config)        # <-- passthrough stub: replace me
-    return result
+    cache_dict = context.get("cache", {})
+    cache_lock = context.get("cache_lock")
+    
+    # Check Cache
+    if cache_lock:
+        with cache_lock:
+            if question in cache_dict:
+                return cache_dict[question]
+    else:
+        if question in cache_dict:
+            return cache_dict[question]
+
+    try:
+        # Pass through to the real agent
+        result = call_next(question, config)
+        
+        # Extract telemetry data
+        meta = result.get("meta", {})
+        usage = meta.get("usage", {})
+        latency = meta.get("latency_ms", 0)
+        model = config.get("model", "gpt-5.4-nano")
+        cost = cost_from_usage(model, usage)
+        
+        # Log the full request details
+        logger.log_event("agent_call", {
+            "question": question,
+            "answer": result.get("answer"),
+            "status": result.get("status"),
+            "latency_ms": latency,
+            "cost_usd": cost,
+            "usage": usage,
+            "steps": result.get("steps", []),
+            "trace": result.get("trace", [])
+        })
+        
+        # FINAL SANITIZATION: Redact PII from the answer before returning to the simulator
+        if result.get("answer") and config.get("redact_pii", False):
+            result["answer"] = redact(result["answer"])[0]
+            
+        # Save successful results to Cache
+        if result.get("status") == "ok":
+            if cache_lock:
+                with cache_lock:
+                    cache_dict[question] = result
+            else:
+                cache_dict[question] = result
+                
+        return result
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+

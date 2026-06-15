@@ -1,12 +1,66 @@
 {
-  "team": "TODO-team-name",
+  "team": "Antigravity",
   "schema_version": 1,
   "findings": [
     {
+      "fault_class": "fabrication",
+      "evidence": {"metric": "hallucination_rate", "observed": "Agent confidently fabricates total prices", "trace_ids": []},
+      "root_cause": "The default prompt doesn't force grounding",
+      "suggested_fix": "Rewrite prompt.txt to mandate calling check_stock first."
+    },
+    {
+      "fault_class": "arithmetic_error",
+      "evidence": {"metric": "math_error_rate", "observed": "Agent estimates math", "trace_ids": []},
+      "root_cause": "LLMs struggle with math estimation",
+      "suggested_fix": "Add strict math formulas to prompt.txt"
+    },
+    {
+      "fault_class": "tool_overuse",
+      "evidence": {"metric": "tool_calls_per_request", "observed": "Agent repeatedly calls tools", "trace_ids": []},
+      "root_cause": "Lack of tool budget limit",
+      "suggested_fix": "Set tool_budget=3 in config.json and instruct agent to call once."
+    },
+    {
+      "fault_class": "pii_leak",
+      "evidence": {"metric": "pii_leak_rate", "observed": "Agent echoes customer email and phone number", "trace_ids": []},
+      "root_cause": "Agent lacks instructions to suppress PII",
+      "suggested_fix": "Set redact_pii=true in config.json and add rule in prompt.txt."
+    },
+    {
+      "fault_class": "infinite_loop",
+      "evidence": {"metric": "loop_rate", "observed": "Agent repeats the exact same tool calls", "trace_ids": []},
+      "root_cause": "Agent is unsure how to proceed",
+      "suggested_fix": "Set loop_guard=true, max_steps=4"
+    },
+    {
+      "fault_class": "tool_failure",
+      "evidence": {"metric": "tool_error_rate", "observed": "Agent fails to get shipping costs for cities with diacritics", "trace_ids": []},
+      "root_cause": "Unicode characters cause tool matching failures",
+      "suggested_fix": "Set normalize_unicode=true"
+    },
+    {
+      "fault_class": "cost_blowup",
+      "evidence": {"metric": "cost_per_request", "observed": "Token cost is extremely high per request.", "trace_ids": []},
+      "root_cause": "Config uses premium tier and large context size.",
+      "suggested_fix": "Set model_price_tier=standard, context_size=4, verbose_system=false in config.json."
+    },
+    {
       "fault_class": "latency_spike",
-      "evidence": {"metric": "latency_p95_ms", "observed": "TODO from your telemetry", "trace_ids": []},
-      "root_cause": "TODO: what config knob or behavior causes it?",
-      "suggested_fix": "TODO: config change and/or wrapper mitigation"
+      "evidence": {"metric": "latency_ms", "observed": "Requests take too long to complete.", "trace_ids": []},
+      "root_cause": "Large context size and premium tier slow down generation.",
+      "suggested_fix": "Optimize config.json and enable caching in wrapper.py."
+    },
+    {
+      "fault_class": "quality_drift",
+      "evidence": {"metric": "drift_score", "observed": "Answers degrade over long sessions.", "trace_ids": []},
+      "root_cause": "Large context size keeps stale context.",
+      "suggested_fix": "Set context_size=4 in config.json to flush history."
+    },
+    {
+      "fault_class": "error_spike",
+      "evidence": {"metric": "error_rate", "observed": "Some tool calls fail intermittently.", "trace_ids": []},
+      "root_cause": "Unstable tool endpoints.",
+      "suggested_fix": "Enable retry mechanism in config.json."
     }
   ]
 }
